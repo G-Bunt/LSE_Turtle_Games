@@ -127,7 +127,10 @@ product_sales_sum %>%
   arrange(desc(Total_Global_Sales)) %>%
   slice(1:20) %>%
   ggplot(., aes(x=reorder(Product,-Total_Global_Sales), y=Total_Global_Sales))+
-  geom_bar(stat='identity') 
+  geom_bar(stat='identity') +
+  labs(title="Global best selling Products",
+       x="Products ordered by Global Sales",
+       y="Global Sales")
 
 # Determine the impact on sales per platform.
 platform_sales_sum <- turtle_clean %>%
@@ -137,13 +140,38 @@ platform_sales_sum <- turtle_clean %>%
             Total_Global_Sales = sum(Global_Sales))
 summary(platform_sales_sum)
 str(platform_sales_sum)
+head(platform_sales_sum)
 
 # Plot the top 20 Platforms.
 platform_sales_sum %>% 
   arrange(desc(Total_Global_Sales)) %>%
   slice(1:20) %>%
   ggplot(., aes(x=reorder(Platform,-Total_Global_Sales), y=Total_Global_Sales))+
-  geom_bar(stat='identity') 
+  geom_bar(stat='identity') +
+  labs(title="Global best selling Platforms",
+     x="Platforms ordered by Global Sales",
+     y="Global Sales")
+
+# Investigate Global top selling products by platform
+## The below barchart shows that out of the 15 top selling products globally,
+## a significant amount (33%, 5 products) are Wii exclusives.
+
+# Create a merged table to allow sorting on Global Sales value. 
+## NOTE: this table is not ideal for future analysis  as Total Sales are
+## double counted. It is created for the barchart only.
+turtle_prod_plat <- merge(x=turtle_clean,y=product_sales_sum,by='Product')
+head(turtle_prod_plat)
+
+turtle_prod_plat %>% 
+  arrange(desc(Total_Global_Sales)) %>%
+  slice(1:35) %>%
+  ggplot(., aes(x=reorder(Product,-Total_Global_Sales), 
+                y=Global_Sales, 
+                fill=Platform)) +
+  geom_bar(stat='identity', position="stack")  +
+  labs(title="Global best selling Products by Platform",
+       x="Product by Platform",
+       y="Global Sales")
 
 # Determine the normality of the data set (sales data).
 # Total Global Sales per Product.
@@ -187,19 +215,10 @@ kurtosis(product_sales_sum$Total_EU_Sales)
 cor(select(product_sales_sum,-Product))
 corPlot(select(product_sales_sum,-Product),cex=1.0)
 
-# Create plots to review and determine insights into the data set.
-product_sales_sum_pivot = melt(product_sales_sum, id= c("Product"))
-summary(product_sales_sum_pivot$variable)
 
 
 
-# Create plots to gain insights into the sales data. 
-# Choose the type of plot you think best suits the data set 
-# and what you want to investigate. Explain your answer in your report.
-# Compare all the sales data (columns) for any correlation(s).
-# Add a trend line to the plots for ease of interpretation.
-# Idea if time: top selling games per region, platform, product.
-# Idea if time: do the top games sell equally good across platform and region?
+
 
 # Create a simple linear regression model.
 # Create plots to view the linear regression.
