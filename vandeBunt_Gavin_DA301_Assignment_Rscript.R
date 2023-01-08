@@ -1,3 +1,52 @@
+## LSE Data Analytics Online Career Accelerator 
+
+# DA301:  Advanced Analytics for Organisational Impact
+# Author: Gavin van de Bunt
+# Date: 09 January 2023
+
+###############################################################################
+
+# Context
+
+## This is a continuation of the analysis for Turtle Games, a game manufacturer 
+## and retailer. They manufacture and sell their own products, along with 
+## sourcing and selling products manufactured by other companies. Their product 
+## range includes books, board games, video games and toys. They have a global 
+## customer base and have a business objective of improving overall sales 
+## performance by utilising customer trends. 
+
+## In particular, this R-script contains analysis that builds on the work done
+## in Python, which can be found in the GitHub repository. The previous Python 
+## analysis helps Turtle games understand: 
+## - how customers accumulate loyalty points.
+## - how useful remuneration and spending scores data are.
+## - how social data (e.g. customer reviews) can be used in marketing campaigns.
+
+## The analysis in R below aims to answer the remaining business questions for
+## Turtle games:
+## - what is the impact on sales per product?
+## - what is the reliability of the data (e.g. normal dist., Skew, Kurtosis)?
+## - is there any possible relationship(s) in sales between North America, 
+##    Europe, and global sales?
+
+## In addition to this Python notebook and the above mentioned R script, 
+## you can find a detailed report and accompanying presentation in the 
+## parent GitHub repository.
+
+## PLEASE NOTE: 
+## Chapter numbering is a continuation from the Python script,
+## allowing for easier documentation through the accompanying PDF document. 
+
+## For any questions, please reach out to GavinvdBunt@Gmail.com
+
+################################################################################
+
+# 8.Exploratory data analysis using R
+
+## The sales department of Turtle games prefers R to Python. Therefore we will
+## explore and prepare the data set for analysis by utilising basic statistics 
+## and plots. 
+
 ## Import all the required libraries for the analysis and view the data. 
 # install.packages("tidyverse")
 library(tidyverse)
@@ -5,6 +54,7 @@ library(skimr)
 library(DataExplorer)
 library(moments)
 library(psych)
+library(dplyr)
 
 ## Load and explore the data.
 getwd()
@@ -17,23 +67,47 @@ turtle_clean <- select(turtle_sales_raw, -Ranking,-Year,-Genre,-Publisher)
 
 # View the data frame to sense-check the data set.
 View(turtle_clean)
+
+# Product refers to a product code, so change data type to factor for analysis.
 turtle_clean$Product <- factor(turtle_clean$Product)
 dim(turtle_clean)
 
-## Other statistics
+## Other statistics: no missing values, 175 products across 17 platforms.
 skim(turtle_clean)
-# Data Explorer (commented out to avoid rerunning)
+
+# Data Explorer (comment out to avoid rerunning)
+## Graphs show interesting preliminary insights into the sales data:
+## - Data is clearly skewed to the right across all regions. More on this later.
+## - Strong correlation between the different sales regions. More on this later.
 DataExplorer::create_report(turtle_clean)
 
-## Create scatterplots, histograms and boxplots 
-## to gain insights into the sales data.
-qplot(data=turtle_clean,x=Platform,y=Global_Sales,geom='boxplot')
-qplot(data=turtle_clean,x=Global_Sales,geom='histogram')
-qplot(data=turtle_clean,x=Platform,y=Global_Sales,geom='point',colour = Product)
-qplot(data=turtle_clean,x=Platform,y=Global_Sales,geom='col')
-qplot(data=turtle_clean,x=Platform,geom='bar')
+## Scatterplots, histograms and boxplots to gain insights into the sales data.
+# Pivot data to allow easy comparison of Sales categories.
+turtle_long <- turtle_clean %>% 
+  pivot_longer(c("NA_Sales","EU_Sales","Global_Sales"), 
+               names_to="Region", values_to="Sales")
+
+ggplot(turtle_long, aes(x =Region, y=Sales)) +
+  geom_boxplot()
+
+ggplot(data=turtle_long, aes(x=Sales)) +
+  geom_histogram()  +
+  facet_wrap(~Region)
+
+qplot(data=turtle_clean,x=EU_Sales,y=Global_Sales,geom='point')
+qplot(data=turtle_clean,x=NA_Sales,y=Global_Sales,geom='point')
+qplot(data=turtle_clean,x=EU_Sales,y=NA_Sales,geom='point')
+
+# 9.Understand data structure and popular products.
+## This section explores the normality of the dataset based on plots, Skewness, 
+## Kurtosis, and a Shapiro-Wilk test. In addition, the Sales data is explored
+## further and popular Products and Platforms are identified for further
+## analysis.
 
 # Determine the min, max and mean values of all the sales data.
+## Both the mean and the max of the NA Sales are higher than the EU Sales. It
+## therefore seems likely that NA Sales have the greater impact on Global sales.
+## This will be confirmed in the upcoming section through the correlations.
 turtle_sales_only <- select(turtle_sales_raw,NA_Sales,EU_Sales,Global_Sales)
 apply(turtle_sales_only,2,min)
 apply(turtle_sales_only,2,max)
@@ -48,13 +122,35 @@ product_sales_sum <- turtle_clean %>%
 summary(product_sales_sum)
 str(product_sales_sum)
 
-# To add: ranking of top 10 products - check how many unique Plat/Prod.
-# To add: extra group by(s) on the platform
-# To add: barcharts to represent above top n. 
-# Can use dodge for NA vs. EU vs. Global bar comparison.
+# Plot the top 20 Products.
+product_sales_sum %>% 
+  arrange(desc(Total_Global_Sales)) %>%
+  slice(1:20) %>%
+  ggplot(., aes(x=reorder(Product,-Total_Global_Sales), y=Total_Global_Sales))+
+  geom_bar(stat='identity') 
+
+# Determine the impact on sales per platform.
+platform_sales_sum <- turtle_clean %>%
+  group_by(Platform) %>%
+  summarize(Total_NA_Sales=sum(NA_Sales),
+            Total_EU_Sales=sum(EU_Sales),
+            Total_Global_Sales = sum(Global_Sales))
+summary(platform_sales_sum)
+str(platform_sales_sum)
+
+# Plot the top 20 Platforms.
+platform_sales_sum %>% 
+  arrange(desc(Total_Global_Sales)) %>%
+  slice(1:20) %>%
+  ggplot(., aes(x=reorder(Platform,-Total_Global_Sales), y=Total_Global_Sales))+
+  geom_bar(stat='identity') 
 
 # Determine the normality of the data set (sales data).
 # Total Global Sales per Product.
+## Conclusions - data is not normally distributed:
+## - Shapiro-Wilk p<0.05: data is not normally distributed.
+## - Skewness much larger than 1: data is skewed (right)
+## - Kurtosis much larger than 3: heavy tails.
 qqnorm(product_sales_sum$Total_Global_Sales)
 qqline(product_sales_sum$Total_Global_Sales)     
 shapiro.test(product_sales_sum$Total_Global_Sales)
@@ -62,6 +158,10 @@ skewness(product_sales_sum$Total_Global_Sales)
 kurtosis(product_sales_sum$Total_Global_Sales)
 
 # Total NA Sales per Product.
+## Conclusions - data is not normally distributed:
+## - Shapiro-Wilk p<0.05: data is not normally distributed.
+## - Skewness much larger than 1: data is skewed (right)
+## - Kurtosis much larger than 3: heavy tails.
 qqnorm(product_sales_sum$Total_NA_Sales)
 qqline(product_sales_sum$Total_NA_Sales)     
 shapiro.test(product_sales_sum$Total_NA_Sales)
@@ -69,6 +169,10 @@ skewness(product_sales_sum$Total_NA_Sales)
 kurtosis(product_sales_sum$Total_NA_Sales)
 
 # Total EU Sales per Product.
+## Conclusions - data is not normally distributed:
+## - Shapiro-Wilk p<0.05: data is not normally distributed.
+## - Skewness much larger than 1: data is skewed (right)
+## - Kurtosis much larger than 3: heavy tails.
 qqnorm(product_sales_sum$Total_EU_Sales)
 qqline(product_sales_sum$Total_EU_Sales)     
 shapiro.test(product_sales_sum$Total_EU_Sales)
@@ -76,25 +180,18 @@ skewness(product_sales_sum$Total_EU_Sales)
 kurtosis(product_sales_sum$Total_EU_Sales)
 
 # Determine if there is any correlation between the sales data columns.
+## As expected, there is heavy correlation between all the sales variables:
+## - Global vs. NA: 0.92
+## - Global vs. EU: 0.85
+## - NA vs. EU: 0.62
 cor(select(product_sales_sum,-Product))
 corPlot(select(product_sales_sum,-Product),cex=1.0)
 
 # Create plots to review and determine insights into the data set.
 product_sales_sum_pivot = melt(product_sales_sum, id= c("Product"))
-summary(test_df$variable)
+summary(product_sales_sum_pivot$variable)
 
-ggplot(product_sales_sum_pivot, aes(x = value)) +
-  geom_histogram() +
-  facet_grid(~variable)
 
-ggplot(product_sales_sum_pivot, aes(x = value)) +
-  geom_boxplot() +
-  facet_grid(~variable)
-
-ggplot(product_sales_sum_pivot, aes(x = value,y=variable)) +
-  geom_point() 
-
-plot(select(product_sales_sum,-Product))
 
 # Create plots to gain insights into the sales data. 
 # Choose the type of plot you think best suits the data set 
