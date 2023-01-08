@@ -216,15 +216,63 @@ cor(select(product_sales_sum,-Product))
 corPlot(select(product_sales_sum,-Product),cex=1.0)
 
 
+# 10: Making recommendations based on Sales figures for Turtle Games
 
+## The sales department wants to better understand if there is any relationship
+## between North America, Europe, and Global sales. Therefore, below analysis
+## investigates any possible relationship(s) in the sales data by creating both 
+## simple and multiple linear regression models. 
 
+## Based on these models and previous analysis recommendations can be made to 
+## Turtle Games including:
+##   - Confidence in the models based on goodness of fit and
+##        accuracy of predictions.
+##   - Suggestions and recommendations to the business.
+##   - Potential improvements the model(s).
+## These full recommendations can be found in the accompanying PDF document 
+## and video presentation, stored in the GitHub repository.
 
+# First two simple linear regression models are created with EU and NA sales 
+# as independent variable respectively. Both models are very significant with 
+# p close to 0 and have a high predictive value with R-squared being 0.72 and 
+# 0.84 respectively. As found before through the correlation plots, NA sales 
+# explain the Global sales slightly better. However, the coefficient does show
+# that for each increase in EU sales, the Global sales shows a stronger
+# increase (coefficient of 2.24 vs. 1.63). 
 
-# Create a simple linear regression model.
-# Create plots to view the linear regression.
+# Create plots to view the linear regression for EU sales and NA sales.
+EU_model = lm(Total_Global_Sales~Total_EU_Sales,
+           data=product_sales_sum)
+summary(EU_model)
+
+NA_model = lm(Total_Global_Sales~Total_NA_Sales,
+              data=product_sales_sum)
+summary(NA_model)
+
+# Visualize both models in the same output.
+# Arrange plot with the par(mfrow) function.
+par(mfrow=c(2, 1))
+
+# Compare both graphs (model1 and model2).
+plot(product_sales_sum$Total_EU_Sales,product_sales_sum$Total_Global_Sales)
+abline(coefficients(EU_model), col='red')
+
+plot(product_sales_sum$Total_NA_Sales,product_sales_sum$Total_Global_Sales)
+abline(coefficients(NA_model), col='blue')
+
+# The linear model shows a strong predictive value with an R-squared of .97. 
+# As expected, both predictor variables are strongly significant. However,
+# we have to be careful with interpretation of the model as many assumptions of
+# linear regression have been proven to be broken in the previous sectors
+# (e.g. not normally distributed, heavy correlation).
+
+# Nevertheless, it does make conceptual sense that global sales will rise when
+# sales in an individual region (NA and/or EU) go up.
 
 # Create a multiple linear regression model.
 model = lm(Total_Global_Sales~Total_EU_Sales+Total_NA_Sales,
            data=product_sales_sum)
 summary(model)
 
+## For business recommendations and further context, please refer to the PDF 
+## file and video presentation located in the GitHub repository.
