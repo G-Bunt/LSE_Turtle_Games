@@ -267,7 +267,8 @@ abline(coefficients(NA_model), col='blue')
 # (e.g. not normally distributed, heavy correlation).
 
 # Nevertheless, it does make conceptual sense that global sales will rise when
-# sales in an individual region (NA and/or EU) go up.
+# sales in an individual region (NA and/or EU) go up and this can be used 
+# for business planning and decision making.
 
 # Create a multiple linear regression model.
 model = lm(Total_Global_Sales~Total_EU_Sales+Total_NA_Sales,
