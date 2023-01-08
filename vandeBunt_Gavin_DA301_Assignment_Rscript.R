@@ -262,9 +262,9 @@ abline(coefficients(NA_model), col='blue')
 
 # The linear model shows a strong predictive value with an R-squared of .97. 
 # As expected, both predictor variables are strongly significant. However,
-# we have to be careful with interpretation of the model as many assumptions of
+# we have to be careful with interpretation of the model as assumptions of
 # linear regression have been proven to be broken in the previous sectors
-# (e.g. not normally distributed, heavy correlation).
+# (e.g. not normally distributed)
 
 # Nevertheless, it does make conceptual sense that global sales will rise when
 # sales in an individual region (NA and/or EU) go up and this can be used 
@@ -274,6 +274,16 @@ abline(coefficients(NA_model), col='blue')
 model = lm(Total_Global_Sales~Total_EU_Sales+Total_NA_Sales,
            data=product_sales_sum)
 summary(model)
+
+# Check the Variance Inflation Factor (VIF). It shows that VIF is acceptable
+# and therefore multicollinearity is not an issue.
+library(car)
+vif(model)
+
+# Heteroskedasticity is checked in the final model via a Breusch-Pagan test. 
+# As p>0,05, we can say no evidence is found to assume Heteroskedasticity. 
+library(lmtest)
+bptest(model)
 
 ## For business recommendations and further context, please refer to the PDF 
 ## file and video presentation located in the GitHub repository.
