@@ -18,15 +18,15 @@
 ## In particular, this R-script contains analysis that builds on the work done
 ## in Python, which can be found in the GitHub repository. The previous Python 
 ## analysis helps Turtle games understand: 
-## - how customers accumulate loyalty points.
-## - how useful remuneration and spending scores data are.
-## - how social data (e.g. customer reviews) can be used in marketing campaigns.
+## 1. how customers accumulate loyalty points.
+## 2. how useful remuneration and spending scores data are.
+## 3. how social data (e.g. customer reviews) can be used in marketing campaigns.
 
 ## The analysis in R below aims to answer the remaining business questions for
 ## Turtle games:
-## - what is the impact on sales per product?
-## - what is the reliability of the data (e.g. normal dist., Skew, Kurtosis)?
-## - is there any possible relationship(s) in sales between North America, 
+## 4. what is the impact on sales per product?
+## 5. what is the reliability of the data (e.g. normal dist., Skew, Kurtosis)?
+## 6. is there any possible relationship(s) in sales between North America, 
 ##    Europe, and global sales?
 
 ## In addition to this Python notebook and the above mentioned R script, 
@@ -98,11 +98,8 @@ qplot(data=turtle_clean,x=EU_Sales,y=Global_Sales,geom='point')
 qplot(data=turtle_clean,x=NA_Sales,y=Global_Sales,geom='point')
 qplot(data=turtle_clean,x=EU_Sales,y=NA_Sales,geom='point')
 
-# 9.Understand data structure and popular products.
-## This section explores the normality of the dataset based on plots, Skewness, 
-## Kurtosis, and a Shapiro-Wilk test. In addition, the Sales data is explored
-## further and popular Products and Platforms are identified for further
-## analysis.
+## After above EDA, the Sales data is explored further and popular Products 
+## and Platforms are identified for further analysis.
 
 # Determine the min, max and mean values of all the sales data.
 ## Both the mean and the max of the NA Sales are higher than the EU Sales. It
@@ -172,6 +169,12 @@ turtle_prod_plat %>%
   labs(title="Global best selling Products by Platform",
        x="Product by Platform",
        y="Global Sales")
+
+
+# 9.Understand data structure and popular products.
+## This section explores the normality of the dataset based on plots, Skewness, 
+## Kurtosis, and a Shapiro-Wilk test. This is to answer the fifth business
+## question, as documented at the start of this R-script.
 
 # Determine the normality of the data set (sales data).
 # Total Global Sales per Product.
