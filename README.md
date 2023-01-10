@@ -11,6 +11,7 @@ This repository consists of three file categories
   2.2 R-script containing analysis and basic markdown comments/context.
 3. Presentations providing context and business insights related to the analysis: <br>
   3.1 PDF document describing the approach, choice points and insights from Python/R analysis. <br>
-  3.2 MP4 video presentation that further clarifies insights and focuses on business impact.
+  3.2 Please use below link for MP4 video presentation that further clarifies insights and focuses on business impact:
+  https://drive.google.com/drive/folders/1GjNxPaAa6DNFTU4U1vuM41OCpBWp744J?usp=sharing 
   
  For questions, please reach out to GavinvdBunt@Gmail.com 
